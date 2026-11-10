@@ -41,6 +41,11 @@ public:
     void setScreenHidden(bool hidden);
     bool isScreenHidden() const;
 
+    // 鼠标锁定：把指针钳制在画面区域内，再按一次解除。
+    // 绑在 ` 键上（默认 keymap 的 switchKey 已让位给 F9）。
+    void setCursorLocked(bool locked);
+    bool isCursorLocked() const;
+
 private:
     void onFrame(int width, int height, uint8_t* dataY, uint8_t* dataU, uint8_t* dataV,
                  int linesizeY, int linesizeU, int linesizeV) override;
@@ -121,6 +126,8 @@ private:
     bool m_blankDragging = false;
     QPoint m_blankPressGlobal;
     QPoint m_blankDragOffset;
+    // 鼠标是否被钳制在画面区域内
+    bool m_cursorLocked = false;
     QTimer m_flexResizeTimer;
     QSize m_pendingDisplaySize;
 

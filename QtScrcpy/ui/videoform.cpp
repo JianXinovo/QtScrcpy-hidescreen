@@ -1,5 +1,6 @@
 // #include <QDesktopWidget>
 #include <QCoreApplication>
+#include <QCursor>
 #include <QFileInfo>
 #include <QLabel>
 #include <QMessageBox>
@@ -293,6 +294,43 @@ bool VideoForm::isScreenHidden() const
     return m_screenHidden;
 }
 
+void VideoForm::setCursorLocked(bool locked)
+{
+    if (m_cursorLocked == locked) {
+        return;
+    }
+    m_cursorLocked = locked;
+#ifdef Q_OS_WIN32
+    if (locked) {
+        QWidget *vw = videoWidget();
+        const QRect rc = vw ? QRect(vw->mapToGlobal(QPoint(0, 0)), vw->size()) : frameGeometry();
+        if (rc.isEmpty()) {
+            m_cursorLocked = false;
+            return;
+        }
+        RECT rect;
+        rect.left = rc.left();
+        rect.top = rc.top();
+        rect.right = rc.right();
+        rect.bottom = rc.bottom();
+        ::ClipCursor(&rect);
+        ::SetCursorPos(rc.center().x(), rc.center().y());
+    } else {
+        // 必须成对释放，否则指针会一直被限制在这个矩形里
+        ::ClipCursor(nullptr);
+    }
+#else
+    if (locked) {
+        QCursor::setPos(mapToGlobal(rect().center()));
+    }
+#endif
+}
+
+bool VideoForm::isCursorLocked() const
+{
+    return m_cursorLocked;
+}
+
 void VideoForm::setSerial(const QString &serial)
 {
     m_serial = serial;
@@ -404,6 +442,11 @@ void VideoForm::installShortcut()
     shortcut = new QShortcut(QKeySequence("Ctrl+Shift+H"), this);
     shortcut->setAutoRepeat(false);
     connect(shortcut, &QShortcut::activated, this, [this]() { setScreenHidden(!m_screenHidden); });
+
+    // 鼠标锁定：按 ` 把指针锁进画面区域，再按一次松开
+    shortcut = new QShortcut(QKeySequence(Qt::Key_QuoteLeft), this);
+    shortcut->setAutoRepeat(false);
+    connect(shortcut, &QShortcut::activated, this, [this]() { setCursorLocked(!m_cursorLocked); });
 
     // removeBlackRect
     shortcut = new QShortcut(QKeySequence("Ctrl+w"), this);
@@ -1131,6 +1174,8 @@ void VideoForm::resizeEvent(QResizeEvent *event)
 void VideoForm::closeEvent(QCloseEvent *event)
 {
     Q_UNUSED(event)
+    // 窗口关闭前一定要解除指针钳制，否则鼠标会一直被困在旧矩形里
+    setCursorLocked(false);
     auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
     if (!device) {
         return;
