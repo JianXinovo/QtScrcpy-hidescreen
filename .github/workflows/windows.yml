@@ -7,14 +7,14 @@ on:
       - '!QtScrcpy/res/**'
       - 'keymap/**'
       - '.github/workflows/windows.yml'
-      - 'ci/win**'
+      - 'ci/**'
   pull_request:
     paths:
       - 'QtScrcpy/**'
       - '!QtScrcpy/res/**'
       - 'keymap/**'
       - '.github/workflows/windows.yml'
-      - 'ci/win**'
+      - 'ci/**'
   # 允许在网页上手动点 Run workflow 触发一次构建
   workflow_dispatch:
 jobs:
