@@ -169,6 +169,32 @@ void VideoForm::initUI()
         m_keymapEditor->setGeometry(vw->rect());
         vw->installEventFilter(m_keymapEditor);
     }
+
+    // 常驻显示当前映射模式：normal 时 WASD 只当普通按键，不会变成移动
+    m_mapStateLabel = new QLabel(this);
+    m_mapStateLabel->setStyleSheet("QLabel { color: #ff8080; background: rgba(0,0,0,150); padding: 2px 8px; border-radius: 4px; }");
+    m_mapStateLabel->setText(tr("KEYMAP: NORMAL"));
+    m_mapStateLabel->move(8, 8);
+    m_mapStateLabel->adjustSize();
+    m_mapStateLabel->raise();
+
+    m_mapStateTimer = new QTimer(this);
+    m_mapStateTimer->setInterval(400);
+    connect(m_mapStateTimer, &QTimer::timeout, this, [this]() {
+        if (!m_mapStateLabel) {
+            return;
+        }
+        auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
+        const bool custom = device && device->isCurrentCustomKeymap();
+        m_mapStateLabel->setText(custom ? tr("KEYMAP: CUSTOM (F9)") : tr("KEYMAP: NORMAL (F9)"));
+        m_mapStateLabel->setStyleSheet(custom
+            ? "QLabel { color: #66ff99; background: rgba(0,0,0,150); padding: 2px 8px; border-radius: 4px; }"
+            : "QLabel { color: #ff8080; background: rgba(0,0,0,150); padding: 2px 8px; border-radius: 4px; }");
+        m_mapStateLabel->adjustSize();
+        m_mapStateLabel->raise();
+        m_mapStateLabel->show();
+    });
+    m_mapStateTimer->start();
 }
 
 QRect VideoForm::getGrabCursorRect()
@@ -425,7 +451,7 @@ void VideoForm::setKeyMapFile(const QString &path)
 void VideoForm::activateCustomKeymap()
 {
     auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
-    if (!device || device->isCurrentCustomKeymap()) {
+    if (!device) {
         return;
     }
     int switchKey = Qt::Key_F9;
@@ -440,14 +466,26 @@ void VideoForm::activateCustomKeymap()
 #endif
         }
     }
-    QWidget *vw = videoWidget();
-    const QSize showSize = vw ? vw->size() : size();
-    // 核心层的自定义映射只能靠 switchKey 切换，这里代按一次，
-    // 让 apply script 之后键鼠映射直接生效
-    QKeyEvent press(QEvent::KeyPress, switchKey, Qt::NoModifier);
-    emit device->keyEvent(&press, m_frameSize, showSize);
-    QKeyEvent release(QEvent::KeyRelease, switchKey, Qt::NoModifier);
-    emit device->keyEvent(&release, m_frameSize, showSize);
+
+    // 核心层没有暴露 setter，只能代按一次 switchKey 让它从 normal 切到 custom。
+    // updateScript 会重建 InputConvertGame，状态是重置的，所以这里必须切一次。
+    auto sendSwitch = [this, switchKey]() {
+        auto dev = qsc::IDeviceManage::getInstance().getDevice(m_serial);
+        if (!dev || dev->isCurrentCustomKeymap()) {
+            return;
+        }
+        QWidget *vw = videoWidget();
+        const QSize showSize = vw ? vw->size() : size();
+        QKeyEvent press(QEvent::KeyPress, switchKey, Qt::NoModifier);
+        emit dev->keyEvent(&press, m_frameSize, showSize);
+        QKeyEvent release(QEvent::KeyRelease, switchKey, Qt::NoModifier);
+        emit dev->keyEvent(&release, m_frameSize, showSize);
+        qInfo() << "activateCustomKeymap switchKey=" << switchKey
+                << "custom=" << dev->isCurrentCustomKeymap();
+    };
+    sendSwitch();
+    // 时序兜底：万一第一次落在重建过程中，再补一次
+    QTimer::singleShot(250, this, sendSwitch);
 }
 
 void VideoForm::toggleKeyMapEditor()

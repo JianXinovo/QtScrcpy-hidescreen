@@ -151,6 +151,9 @@ private:
     QPointer<KeyMapEditor> m_keymapEditor;
     // 鼠标锁定状态提示（短暂显示，用来确认到底锁没锁上）
     QPointer<QLabel> m_lockHint;
+    // 映射模式状态（普通 / 自定义），常驻显示，方便判断键位到底有没有生效
+    QPointer<QLabel> m_mapStateLabel;
+    QTimer *m_mapStateTimer = nullptr;
     QTimer m_flexResizeTimer;
     QSize m_pendingDisplaySize;
 
