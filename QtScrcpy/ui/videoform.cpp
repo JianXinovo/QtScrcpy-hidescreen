@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QMoveEvent>
 #include <QPainter>
 #include <QScreen>
 #include <QShortcut>
@@ -304,6 +305,28 @@ bool VideoForm::isScreenHidden() const
     return m_screenHidden;
 }
 
+void VideoForm::updateCursorClip()
+{
+#ifdef Q_OS_WIN32
+    if (!m_cursorLocked) {
+        return;
+    }
+    QWidget *vw = videoWidget();
+    const QRect rc = vw ? QRect(vw->mapToGlobal(QPoint(0, 0)), vw->size()) : frameGeometry();
+    if (rc.isEmpty()) {
+        return;
+    }
+    RECT rect;
+    rect.left = rc.left();
+    rect.top = rc.top();
+    rect.right = rc.right();
+    rect.bottom = rc.bottom();
+    ::ClipCursor(&rect);
+#else
+    // 非 Windows 平台没有 ClipCursor，锁定只靠隐藏指针
+#endif
+}
+
 void VideoForm::setCursorLocked(bool locked)
 {
     if (m_cursorLocked == locked) {
@@ -314,32 +337,13 @@ void VideoForm::setCursorLocked(bool locked)
         // 先把系统指针藏起来，否则用户看到的仍是桌面上的那个箭头，
         // 只有"隐藏指针 + 钳制范围"才算是真的把鼠标嵌进画面里。
         QGuiApplication::setOverrideCursor(Qt::BlankCursor);
-    }
-#ifdef Q_OS_WIN32
-    if (locked) {
-        QWidget *vw = videoWidget();
-        const QRect rc = vw ? QRect(vw->mapToGlobal(QPoint(0, 0)), vw->size()) : frameGeometry();
-        if (rc.isEmpty()) {
-            QGuiApplication::restoreOverrideCursor();
-            m_cursorLocked = false;
-            return;
-        }
-        RECT rect;
-        rect.left = rc.left();
-        rect.top = rc.top();
-        rect.right = rc.right();
-        rect.bottom = rc.bottom();
-        ::ClipCursor(&rect);
+        updateCursorClip();
     } else {
-        // 必须成对释放，否则指针会一直被限制在这个矩形里
+#ifdef Q_OS_WIN32
         ::ClipCursor(nullptr);
-        QGuiApplication::restoreOverrideCursor();
-    }
-#else
-    if (!locked) {
-        QGuiApplication::restoreOverrideCursor();
-    }
 #endif
+        QGuiApplication::restoreOverrideCursor();
+    }
 }
 
 bool VideoForm::isCursorLocked() const
@@ -1144,8 +1148,7 @@ void VideoForm::wheelEvent(QWheelEvent *event)
 }
 
 void VideoForm::keyPressEvent(QKeyEvent *event)
-{
-    auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
+{    auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
     if (!device) {
         return;
     }
@@ -1201,9 +1204,18 @@ void VideoForm::showEvent(QShowEvent *event)
     }
 }
 
+void VideoForm::moveEvent(QMoveEvent *event)
+{
+    QWidget::moveEvent(event);
+    // 窗口被拖动或全屏切换后，钳制矩形必须跟着刷新，否则鼠标能跑到窗口外
+    updateCursorClip();
+}
+
 void VideoForm::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event)
+    // 窗口尺寸变了，指针钳制矩形要跟着变，否则鼠标能活动到窗口之外
+    updateCursorClip();
     if (m_flexDisplay) {
         m_pendingDisplaySize = ui->keepRatioWidget->size();
         if (!m_pendingDisplaySize.isEmpty()) {

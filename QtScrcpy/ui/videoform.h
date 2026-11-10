@@ -82,6 +82,7 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
+    void moveEvent(QMoveEvent *event) override;
 
     void paintEvent(QPaintEvent *) override;
     void showEvent(QShowEvent *event) override;
@@ -98,6 +99,8 @@ private:
     QWidget* videoWidget() const;
     // 是否使用 Metal 渲染路径
     bool isMetalMode() const;
+    // 按当前窗口位置重新设置指针钳制矩形（窗口移动/缩放后必须刷新，否则锁定区域还是旧的）
+    void updateCursorClip();
 
     // ui
     Ui::videoForm *ui;
