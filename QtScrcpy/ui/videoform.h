@@ -15,6 +15,7 @@ namespace Ui
 class ToolForm;
 class FileHandler;
 class QYUVOpenGLWidget;
+class KeyMapEditor;
 class QLabel;
 class MetalVideoWidget;
 class VideoForm : public QWidget, public qsc::DeviceObserver
@@ -45,6 +46,10 @@ public:
     // 绑在 ` 键上（默认 keymap 的 switchKey 已让位给 F9）。
     void setCursorLocked(bool locked);
     bool isCursorLocked() const;
+
+    // 键位可视化编辑（Ctrl+E 切换，Ctrl+S 保存并同步到设备）
+    void setKeyMapFile(const QString &path);
+    void toggleKeyMapEditor();
 
 private:
     void onFrame(int width, int height, uint8_t* dataY, uint8_t* dataU, uint8_t* dataV,
@@ -128,6 +133,8 @@ private:
     QPoint m_blankDragOffset;
     // 鼠标是否被钳制在画面区域内
     bool m_cursorLocked = false;
+    // 键位可视化编辑器（覆盖在画面上，默认隐藏）
+    QPointer<KeyMapEditor> m_keymapEditor;
     QTimer m_flexResizeTimer;
     QSize m_pendingDisplaySize;
 

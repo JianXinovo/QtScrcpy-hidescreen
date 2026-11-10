@@ -1418,6 +1418,14 @@ void Dialog::onDeviceConnected(bool success, const QString &serial, const QStrin
 
     videoForm->showFPS(ui->fpsCheck->isChecked());
 
+    // 把当前选中的键位文件交给画面窗口，供 Ctrl+E 可视化编辑
+    const QString keymapName = ui->gameBox->currentText();
+    if (!keymapName.isEmpty()) {
+        const QString userKeymap = getKeyMapPath() + "/" + keymapName;
+        const QString defaultKeymap = getDefaultKeyMapPath() + "/" + keymapName;
+        videoForm->setKeyMapFile(QFileInfo::exists(userKeymap) ? userKeymap : defaultKeymap);
+    }
+
     if (ui->alwaysTopCheck->isChecked()) {
         videoForm->staysOnTop();
     }

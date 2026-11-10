@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QCursor>
 #include <QFileInfo>
+#include <QJsonDocument>
 #include <QLabel>
 #include <QMessageBox>
 #include <QMimeData>
@@ -21,6 +22,7 @@
 
 #include "config.h"
 #include "iconhelper.h"
+#include "keymapeditor.h"
 #include "qyuvopenglwidget.h"
 #include "toolform.h"
 #include "mousetap/mousetap.h"
@@ -148,6 +150,14 @@ void VideoForm::initUI()
         m_videoWidget->setMouseTracking(true);
     }
     ui->keepRatioWidget->setMouseTracking(true);
+
+    // 键位编辑器铺满画面区域，默认隐藏，Ctrl+E 唤出
+    QWidget *vw = videoWidget();
+    if (vw) {
+        m_keymapEditor = new KeyMapEditor(vw);
+        m_keymapEditor->setGeometry(vw->rect());
+        vw->installEventFilter(m_keymapEditor);
+    }
 }
 
 QRect VideoForm::getGrabCursorRect()
@@ -300,11 +310,17 @@ void VideoForm::setCursorLocked(bool locked)
         return;
     }
     m_cursorLocked = locked;
+    if (locked) {
+        // 先把系统指针藏起来，否则用户看到的仍是桌面上的那个箭头，
+        // 只有"隐藏指针 + 钳制范围"才算是真的把鼠标嵌进画面里。
+        QGuiApplication::setOverrideCursor(Qt::BlankCursor);
+    }
 #ifdef Q_OS_WIN32
     if (locked) {
         QWidget *vw = videoWidget();
         const QRect rc = vw ? QRect(vw->mapToGlobal(QPoint(0, 0)), vw->size()) : frameGeometry();
         if (rc.isEmpty()) {
+            QGuiApplication::restoreOverrideCursor();
             m_cursorLocked = false;
             return;
         }
@@ -314,14 +330,14 @@ void VideoForm::setCursorLocked(bool locked)
         rect.right = rc.right();
         rect.bottom = rc.bottom();
         ::ClipCursor(&rect);
-        ::SetCursorPos(rc.center().x(), rc.center().y());
     } else {
         // 必须成对释放，否则指针会一直被限制在这个矩形里
         ::ClipCursor(nullptr);
+        QGuiApplication::restoreOverrideCursor();
     }
 #else
-    if (locked) {
-        QCursor::setPos(mapToGlobal(rect().center()));
+    if (!locked) {
+        QGuiApplication::restoreOverrideCursor();
     }
 #endif
 }
@@ -329,6 +345,35 @@ void VideoForm::setCursorLocked(bool locked)
 bool VideoForm::isCursorLocked() const
 {
     return m_cursorLocked;
+}
+
+void VideoForm::setKeyMapFile(const QString &path)
+{
+    if (path.isEmpty() || !m_keymapEditor) {
+        return;
+    }
+    m_keymapEditor->loadFile(path);
+}
+
+void VideoForm::toggleKeyMapEditor()
+{
+    if (!m_keymapEditor) {
+        return;
+    }
+    const bool turnOn = !m_keymapEditor->isEditMode();
+    if (!turnOn) {
+        // 退出编辑：落盘并让设备立刻用上新键位，不必再点 apply script
+        m_keymapEditor->saveFile();
+        auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
+        if (device) {
+            const QJsonDocument doc(m_keymapEditor->keyMap());
+            device->updateScript(QString::fromUtf8(doc.toJson(QJsonDocument::Compact)));
+        }
+    }
+    m_keymapEditor->setEditMode(turnOn);
+    if (turnOn) {
+        m_keymapEditor->raise();
+    }
 }
 
 void VideoForm::setSerial(const QString &serial)
@@ -447,6 +492,25 @@ void VideoForm::installShortcut()
     shortcut = new QShortcut(QKeySequence(Qt::Key_QuoteLeft), this);
     shortcut->setAutoRepeat(false);
     connect(shortcut, &QShortcut::activated, this, [this]() { setCursorLocked(!m_cursorLocked); });
+
+    // 键位可视化编辑：Ctrl+E 进出编辑模式，Ctrl+S 保存并立刻同步给设备
+    shortcut = new QShortcut(QKeySequence("Ctrl+E"), this);
+    shortcut->setAutoRepeat(false);
+    connect(shortcut, &QShortcut::activated, this, [this]() { toggleKeyMapEditor(); });
+
+    shortcut = new QShortcut(QKeySequence("Ctrl+S"), this);
+    shortcut->setAutoRepeat(false);
+    connect(shortcut, &QShortcut::activated, this, [this]() {
+        if (!m_keymapEditor || !m_keymapEditor->isEditMode()) {
+            return;
+        }
+        m_keymapEditor->saveFile();
+        auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
+        if (device) {
+            const QJsonDocument doc(m_keymapEditor->keyMap());
+            device->updateScript(QString::fromUtf8(doc.toJson(QJsonDocument::Compact)));
+        }
+    });
 
     // removeBlackRect
     shortcut = new QShortcut(QKeySequence("Ctrl+w"), this);
