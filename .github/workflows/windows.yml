@@ -27,6 +27,8 @@ jobs:
 
     # 矩阵配置 https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstrategymatrix
     strategy:
+      # 两个架构互不牵连：x86 挂了也把 x64 跑完，避免一个矩阵成员失败就取消另一个
+      fail-fast: false
       matrix:
         qt-ver: [5.15.2]
         qt-arch: [win64_msvc2019_64, win32_msvc2019]
@@ -66,7 +68,8 @@ jobs:
           target: desktop
           # Architecture for Windows/Android
           arch: ${{ matrix.qt-arch }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          # v4 的参数名是 cache（旧写法 cached 会被判为无效输入，缓存不生效）
+          cache: true
       # 拉取代码（公开子模块走 https，不需要任何 secret）
       - uses: actions/checkout@v4
         with:
