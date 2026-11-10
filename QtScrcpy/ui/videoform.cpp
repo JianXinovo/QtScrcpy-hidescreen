@@ -36,6 +36,13 @@
 #include "metalvideowindow.h"
 #endif
 
+#ifdef Q_OS_WIN32
+namespace {
+// 全局热键 id（任意值，只要窗口内唯一）
+constexpr int kHotkeyLockCursor = 0x4B31;
+} // namespace
+#endif
+
 VideoForm::VideoForm(bool framelessWindow, bool skin, bool showToolbar, int decodeMode, QWidget *parent) : QWidget(parent), ui(new Ui::videoForm), m_skin(skin), m_decodeMode(decodeMode)
 {
     ui->setupUi(this);
@@ -78,6 +85,7 @@ VideoForm::VideoForm(bool framelessWindow, bool skin, bool showToolbar, int deco
 
 VideoForm::~VideoForm()
 {
+    unregisterGlobalHotkeys();
     delete ui;
 }
 
@@ -369,6 +377,45 @@ void VideoForm::setCursorLocked(bool locked)
 bool VideoForm::isCursorLocked() const
 {
     return m_cursorLocked;
+}
+
+void VideoForm::registerGlobalHotkeys()
+{
+#ifdef Q_OS_WIN32
+    // 全局注册 `（VK_OEM_3）：QShortcut 只在窗口有焦点时响应，
+    // 而实际使用时焦点经常在别的窗口上，必须用系统级热键。
+    HWND hwnd = reinterpret_cast<HWND>(winId());
+    ::RegisterHotKey(hwnd, kHotkeyLockCursor, 0, VK_OEM_3);
+#endif
+}
+
+void VideoForm::unregisterGlobalHotkeys()
+{
+#ifdef Q_OS_WIN32
+    HWND hwnd = reinterpret_cast<HWND>(winId());
+    ::UnregisterHotKey(hwnd, kHotkeyLockCursor);
+#endif
+}
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool VideoForm::nativeEvent(const QByteArray &eventType, void *message, qintptr *result)
+#else
+bool VideoForm::nativeEvent(const QByteArray &eventType, void *message, long *result)
+#endif
+{
+    Q_UNUSED(eventType)
+#ifdef Q_OS_WIN32
+    MSG *msg = static_cast<MSG *>(message);
+    if (msg && msg->message == WM_HOTKEY && msg->wParam == kHotkeyLockCursor) {
+        setCursorLocked(!m_cursorLocked);
+        if (result) {
+            *result = 0;
+        }
+        return true;
+    }
+#endif
+    Q_UNUSED(result)
+    return QWidget::nativeEvent(eventType, message, result);
 }
 
 void VideoForm::setKeyMapFile(const QString &path)
@@ -1242,6 +1289,7 @@ void VideoForm::paintEvent(QPaintEvent *paint)
 void VideoForm::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event)
+    registerGlobalHotkeys();
     // 窗口每次显示时先做一次越界检查，处理"上次退出时窗口位于副屏、
     // 本次启动副屏已不存在"导致窗口出现在屏幕外的情况。
     //
@@ -1306,6 +1354,7 @@ void VideoForm::closeEvent(QCloseEvent *event)
     Q_UNUSED(event)
     // 窗口关闭前一定要解除指针钳制，否则鼠标会一直被困在旧矩形里
     setCursorLocked(false);
+    unregisterGlobalHotkeys();
     auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
     if (!device) {
         return;

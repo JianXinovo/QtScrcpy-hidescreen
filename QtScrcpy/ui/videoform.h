@@ -96,6 +96,12 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result) override;
+#else
+    bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+#endif
+
 private:
     // 获取当前视频渲染 widget（OpenGL 或 Metal 容器）
     QWidget* videoWidget() const;
@@ -103,6 +109,9 @@ private:
     bool isMetalMode() const;
     // 按当前窗口位置重新设置指针钳制矩形（窗口移动/缩放后必须刷新，否则锁定区域还是旧的）
     void updateCursorClip();
+    // Windows 全局热键：不依赖窗口焦点，随时可切鼠标锁定
+    void registerGlobalHotkeys();
+    void unregisterGlobalHotkeys();
 
     // ui
     Ui::videoForm *ui;
