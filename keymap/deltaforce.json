@@ -2,288 +2,248 @@
 	"switchKey": "Key_F9",
 	"mouseMoveMap": {
 		"startPos": {
-			"x": 0.55,
-			"y": 0.25
+			"x": 0.5315,
+			"y": 0.4682
 		},
 		"speedRatioX": 2.8,
 		"speedRatioY": 1.3,
 		"smallEyes": {
-			"comment": "小眼睛：按住 Alt 时从右侧小眼睛位置拖动，灵敏度更低，适合远处对枪",
+			"comment": "小眼睛：按住 Alt 时灵敏度更低",
 			"type": "KMT_CLICK",
 			"key": "Key_Alt",
 			"pos": {
-				"x": 0.8,
-				"y": 0.3
+				"x": 0.7288,
+				"y": 0.9614
 			},
 			"switchMap": false
 		}
 	},
 	"keyMapNodes": [
 		{
-			"comment": "WASD 移动摇杆",
+			"comment": "WASD 移动摇杆（radius 0.12）",
 			"type": "KMT_STEER_WHEEL",
 			"centerPos": {
-				"x": 0.15,
-				"y": 0.72
+				"x": 0.1351,
+				"y": 0.7295
 			},
 			"leftOffset": 0.1,
 			"rightOffset": 0.1,
-			"upOffset": 0.24,
-			"downOffset": 0.18,
+			"upOffset": 0.12,
+			"downOffset": 0.12,
 			"leftKey": "Key_A",
 			"rightKey": "Key_D",
 			"upKey": "Key_W",
 			"downKey": "Key_S"
 		},
 		{
-			"comment": "左键开火",
-			"type": "KMT_CLICK",
-			"key": "LeftButton",
-			"pos": {
-				"x": 0.87,
-				"y": 0.72
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "右键开镜",
-			"type": "KMT_CLICK",
-			"key": "RightButton",
-			"pos": {
-				"x": 0.95,
-				"y": 0.5
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "Shift 疾跑 / 屏息",
-			"type": "KMT_CLICK",
-			"key": "Key_Shift",
-			"pos": {
-				"x": 0.81,
-				"y": 0.81
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "Space 跳跃",
+			"comment": "press_release",
 			"type": "KMT_CLICK",
 			"key": "Key_Space",
 			"pos": {
-				"x": 0.95,
-				"y": 0.68
+				"x": 0.9713,
+				"y": 0.6925
 			},
 			"switchMap": false
 		},
 		{
-			"comment": "C 蹲下",
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "RightButton",
+			"pos": {
+				"x": 0.9703,
+				"y": 0.5353
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "LeftButton",
+			"pos": {
+				"x": 0.8822,
+				"y": 0.7563
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
 			"type": "KMT_CLICK",
 			"key": "Key_C",
 			"pos": {
-				"x": 0.85,
-				"y": 0.9
+				"x": 0.875,
+				"y": 0.9339
 			},
 			"switchMap": false
 		},
 		{
-			"comment": "Z 趴下",
+			"comment": "press_release",
 			"type": "KMT_CLICK",
 			"key": "Key_Z",
 			"pos": {
-				"x": 0.93,
-				"y": 0.86
+				"x": 0.9539,
+				"y": 0.8838
 			},
 			"switchMap": false
 		},
 		{
-			"comment": "R 换弹",
-			"type": "KMT_CLICK",
-			"key": "Key_R",
-			"pos": {
-				"x": 0.8,
-				"y": 0.9
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "Q 干员技能 1",
-			"type": "KMT_CLICK",
-			"key": "Key_Q",
-			"pos": {
-				"x": 0.72,
-				"y": 0.78
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "E 干员技能 2",
-			"type": "KMT_CLICK",
-			"key": "Key_E",
-			"pos": {
-				"x": 0.78,
-				"y": 0.68
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "X 终极技能",
-			"type": "KMT_CLICK",
-			"key": "Key_X",
-			"pos": {
-				"x": 0.66,
-				"y": 0.86
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "F 交互 / 拾取 / 开门",
-			"type": "KMT_CLICK",
-			"key": "Key_F",
-			"pos": {
-				"x": 0.55,
-				"y": 0.55
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "V 近战",
-			"type": "KMT_CLICK",
-			"key": "Key_V",
-			"pos": {
-				"x": 0.9,
-				"y": 0.6
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "G 治疗 / 医疗包",
-			"type": "KMT_CLICK",
-			"key": "Key_G",
-			"pos": {
-				"x": 0.6,
-				"y": 0.78
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "1 主武器",
-			"type": "KMT_CLICK",
-			"key": "Key_1",
-			"pos": {
-				"x": 0.44,
-				"y": 0.92
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "2 副武器",
-			"type": "KMT_CLICK",
-			"key": "Key_2",
-			"pos": {
-				"x": 0.54,
-				"y": 0.92
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "3 手枪",
-			"type": "KMT_CLICK",
-			"key": "Key_3",
-			"pos": {
-				"x": 0.64,
-				"y": 0.94
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "4 战术投掷物",
-			"type": "KMT_CLICK",
-			"key": "Key_4",
-			"pos": {
-				"x": 0.34,
-				"y": 0.92
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "5 手雷",
-			"type": "KMT_CLICK",
-			"key": "Key_5",
-			"pos": {
-				"x": 0.92,
-				"y": 0.42
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "6 烟雾",
-			"type": "KMT_CLICK",
-			"key": "Key_6",
-			"pos": {
-				"x": 0.49,
-				"y": 0.64
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "= 自动奔跑",
-			"type": "KMT_CLICK",
-			"key": "Key_Equal",
-			"pos": {
-				"x": 0.84,
-				"y": 0.26
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "8 载具 1 号位",
-			"type": "KMT_CLICK",
-			"key": "Key_8",
-			"pos": {
-				"x": 0.69,
-				"y": 0.88
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "9 载具 2 号位",
-			"type": "KMT_CLICK",
-			"key": "Key_9",
-			"pos": {
-				"x": 0.31,
-				"y": 0.88
-			},
-			"switchMap": false
-		},
-		{
-			"comment": "Tab 背包：按下释放鼠标",
+			"comment": "script_key",
 			"type": "KMT_CLICK",
 			"key": "Key_Tab",
 			"pos": {
-				"x": 0.06,
-				"y": 0.9
+				"x": 0.0297,
+				"y": 0.8977
 			},
 			"switchMap": true
 		},
 		{
-			"comment": "M 地图：按下释放鼠标",
+			"comment": "press_release",
 			"type": "KMT_CLICK",
-			"key": "Key_M",
+			"key": "Key_1",
 			"pos": {
-				"x": 0.97,
-				"y": 0.05
+				"x": 0.4498,
+				"y": 0.9134
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "Key_2",
+			"pos": {
+				"x": 0.5348,
+				"y": 0.9112
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "script_key",
+			"type": "KMT_CLICK",
+			"key": "Key_Escape",
+			"pos": {
+				"x": 0.9642,
+				"y": 0.0545
 			},
 			"switchMap": true
 		},
 		{
-			"comment": "B 战术面板：按下释放鼠标",
+			"comment": "鼠标",
+			"type": "KMT_CLICK",
+			"key": "Key_Alt",
+			"pos": {
+				"x": 0.7288,
+				"y": 0.9614
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "Key_3",
+			"pos": {
+				"x": 0.5947,
+				"y": 0.9136
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "Key_4",
+			"pos": {
+				"x": 0.6547,
+				"y": 0.9066
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "Key_T",
+			"pos": {
+				"x": 0.9693,
+				"y": 0.3432
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "捡箱",
+			"type": "KMT_CLICK",
+			"key": "Key_F",
+			"pos": {
+				"x": 0.7226,
+				"y": 0.3545
+			},
+			"switchMap": true
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "Key_H",
+			"pos": {
+				"x": 0.7472,
+				"y": 0.6114
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
 			"type": "KMT_CLICK",
 			"key": "Key_B",
 			"pos": {
-				"x": 0.28,
-				"y": 0.06
+				"x": 0.2016,
+				"y": 0.5295
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "Key_Q",
+			"pos": {
+				"x": 0.1014,
+				"y": 0.4123
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "Key_E",
+			"pos": {
+				"x": 0.1609,
+				"y": 0.4123
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "script_key",
+			"type": "KMT_CLICK",
+			"key": "Key_M",
+			"pos": {
+				"x": 0.0532,
+				"y": 0.1023
 			},
 			"switchMap": true
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "Key_G",
+			"pos": {
+				"x": 0.7718,
+				"y": 0.3591
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "press_release",
+			"type": "KMT_CLICK",
+			"key": "Key_V",
+			"pos": {
+				"x": 0.261,
+				"y": 0.4477
+			},
+			"switchMap": false
 		},
 		{
 			"comment": "F5 快速转身 180 度（正向）",
@@ -314,48 +274,6 @@
 			},
 			"dragSpeed": 1.0,
 			"startDelay": 20
-		},
-		{
-			"comment": "F7 一键治疗：点医疗键再点确认",
-			"type": "KMT_CLICK_MULTI",
-			"key": "Key_F7",
-			"clickNodes": [
-				{
-					"delay": 120,
-					"pos": {
-						"x": 0.6,
-						"y": 0.78
-					}
-				},
-				{
-					"delay": 400,
-					"pos": {
-						"x": 0.62,
-						"y": 0.62
-					}
-				}
-			]
-		},
-		{
-			"comment": "F8 一键屏息开镜",
-			"type": "KMT_CLICK_MULTI",
-			"key": "Key_F8",
-			"clickNodes": [
-				{
-					"delay": 80,
-					"pos": {
-						"x": 0.95,
-						"y": 0.5
-					}
-				},
-				{
-					"delay": 200,
-					"pos": {
-						"x": 0.81,
-						"y": 0.81
-					}
-				}
-			]
 		}
 	]
 }

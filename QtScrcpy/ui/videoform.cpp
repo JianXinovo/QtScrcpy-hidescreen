@@ -321,20 +321,16 @@ void VideoForm::updateCursorClip()
     if (!m_cursorLocked) {
         return;
     }
-    // 用整个窗口矩形（含手机外框）而不是只框住画面，
-    // 否则指针能跑到外框/桌面上，看起来就像"没锁住"。
-    const QRect rc = frameGeometry();
-    if (rc.isEmpty()) {
+    // 直接用系统 API 取窗口的物理像素矩形。
+    // 之前用 frameGeometry() 是 Qt 的逻辑坐标，系统缩放（125%/150%）下
+    // 和 ClipCursor 需要的物理像素对不上，限制区域就会比窗口小一圈、
+    // 位置也偏移，看起来像"两个层错开"。
+    HWND hwnd = reinterpret_cast<HWND>(winId());
+    RECT rect;
+    if (!::GetWindowRect(hwnd, &rect)) {
         return;
     }
-    RECT rect;
-    rect.left = rc.left();
-    rect.top = rc.top();
-    rect.right = rc.right();
-    rect.bottom = rc.bottom();
     ::ClipCursor(&rect);
-#else
-    // 非 Windows 平台没有 ClipCursor，锁定只靠隐藏指针
 #endif
 }
 
