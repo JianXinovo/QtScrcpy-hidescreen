@@ -1,0 +1,379 @@
+{
+	"switchKey": "Key_QuoteLeft",
+	"mouseMoveMap": {
+		"startPos": {
+			"x": 0.57,
+			"y": 0.26
+		},
+		"speedRatioX": 2.6,
+		"speedRatioY": 1.25,
+		"smallEyes": {
+			"comment": "小眼睛：按住 Alt 时鼠标移动改从右侧小眼睛位置拖动（灵敏度更低，适合瞄远处）",
+			"type": "KMT_CLICK",
+			"key": "Key_Alt",
+			"pos": {
+				"x": 0.8,
+				"y": 0.31
+			},
+			"switchMap": false
+		}
+	},
+	"keyMapNodes": [
+		{
+			"comment": "WASD 方向盘移动",
+			"type": "KMT_STEER_WHEEL",
+			"centerPos": {
+				"x": 0.16,
+				"y": 0.75
+			},
+			"leftOffset": 0.1,
+			"rightOffset": 0.1,
+			"upOffset": 0.27,
+			"downOffset": 0.2,
+			"leftKey": "Key_A",
+			"rightKey": "Key_D",
+			"upKey": "Key_W",
+			"downKey": "Key_S"
+		},
+		{
+			"comment": "左键开火（固定屏幕开火键，与鼠标光标无关，隐藏画面也能打）",
+			"type": "KMT_CLICK",
+			"key": "LeftButton",
+			"pos": {
+				"x": 0.86,
+				"y": 0.72
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "右键开镜",
+			"type": "KMT_CLICK",
+			"key": "RightButton",
+			"pos": {
+				"x": 0.96,
+				"y": 0.52
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "Shift 疾跑 / 屏息",
+			"type": "KMT_CLICK",
+			"key": "Key_Shift",
+			"pos": {
+				"x": 0.8,
+				"y": 0.8
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "Space 跳跃",
+			"type": "KMT_CLICK",
+			"key": "Key_Space",
+			"pos": {
+				"x": 0.96,
+				"y": 0.7
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "C 蹲下",
+			"type": "KMT_CLICK",
+			"key": "Key_C",
+			"pos": {
+				"x": 0.86,
+				"y": 0.92
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "Z 趴下",
+			"type": "KMT_CLICK",
+			"key": "Key_Z",
+			"pos": {
+				"x": 0.95,
+				"y": 0.9
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "R 换弹",
+			"type": "KMT_CLICK",
+			"key": "Key_R",
+			"pos": {
+				"x": 0.795,
+				"y": 0.93
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "Q 左探头",
+			"type": "KMT_CLICK_TWICE",
+			"key": "Key_Q",
+			"pos": {
+				"x": 0.12,
+				"y": 0.35
+			}
+		},
+		{
+			"comment": "E 右探头",
+			"type": "KMT_CLICK_TWICE",
+			"key": "Key_E",
+			"pos": {
+				"x": 0.2,
+				"y": 0.35
+			}
+		},
+		{
+			"comment": "F 交互 / 开门 / 拾取",
+			"type": "KMT_CLICK",
+			"key": "Key_F",
+			"pos": {
+				"x": 0.7,
+				"y": 0.34
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "G 备用技能 1",
+			"type": "KMT_CLICK",
+			"key": "Key_G",
+			"pos": {
+				"x": 0.7,
+				"y": 0.44
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "H 备用技能 2",
+			"type": "KMT_CLICK",
+			"key": "Key_H",
+			"pos": {
+				"x": 0.7,
+				"y": 0.54
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "1 主武器",
+			"type": "KMT_CLICK",
+			"key": "Key_1",
+			"pos": {
+				"x": 0.45,
+				"y": 0.9
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "2 副武器",
+			"type": "KMT_CLICK",
+			"key": "Key_2",
+			"pos": {
+				"x": 0.55,
+				"y": 0.9
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "3 手枪 / 近战",
+			"type": "KMT_CLICK",
+			"key": "Key_3",
+			"pos": {
+				"x": 0.67,
+				"y": 0.92
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "4 投掷物",
+			"type": "KMT_CLICK",
+			"key": "Key_4",
+			"pos": {
+				"x": 0.33,
+				"y": 0.95
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "5 医疗箱 / 药",
+			"type": "KMT_CLICK",
+			"key": "Key_5",
+			"pos": {
+				"x": 0.92,
+				"y": 0.4
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "6 能量饮料",
+			"type": "KMT_CLICK",
+			"key": "Key_6",
+			"pos": {
+				"x": 0.49,
+				"y": 0.63
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "7 手雷 / 烟雾",
+			"type": "KMT_CLICK",
+			"key": "Key_7",
+			"pos": {
+				"x": 0.63,
+				"y": 0.82
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "X 载具上下车",
+			"type": "KMT_CLICK",
+			"key": "Key_X",
+			"pos": {
+				"x": 0.7,
+				"y": 0.7
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "V 第一人称 / 第三人称切换",
+			"type": "KMT_CLICK",
+			"key": "Key_V",
+			"pos": {
+				"x": 0.23,
+				"y": 0.95
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "T 语音",
+			"type": "KMT_CLICK",
+			"key": "Key_T",
+			"pos": {
+				"x": 0.72,
+				"y": 0.26
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "= 自动奔跑",
+			"type": "KMT_CLICK",
+			"key": "Key_Equal",
+			"pos": {
+				"x": 0.84,
+				"y": 0.26
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "8 载具 1 号位",
+			"type": "KMT_CLICK",
+			"key": "Key_8",
+			"pos": {
+				"x": 0.69,
+				"y": 0.88
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "9 载具 2 号位",
+			"type": "KMT_CLICK",
+			"key": "Key_9",
+			"pos": {
+				"x": 0.31,
+				"y": 0.88
+			},
+			"switchMap": false
+		},
+		{
+			"comment": "M 地图：按下后释放鼠标，方便用真实光标点地图",
+			"type": "KMT_CLICK",
+			"key": "Key_M",
+			"pos": {
+				"x": 0.98,
+				"y": 0.03
+			},
+			"switchMap": true
+		},
+		{
+			"comment": "Tab 背包：按下后释放鼠标",
+			"type": "KMT_CLICK",
+			"key": "Key_Tab",
+			"pos": {
+				"x": 0.06,
+				"y": 0.9
+			},
+			"switchMap": true
+		},
+		{
+			"comment": "F5 快速转身 180 度：固定起止点的水平拖拽，隐藏画面时最有用，不看画面也能拉枪",
+			"type": "KMT_DRAG",
+			"key": "Key_F5",
+			"startPos": {
+				"x": 0.5,
+				"y": 0.4
+			},
+			"endPos": {
+				"x": 0.86,
+				"y": 0.4
+			},
+			"dragSpeed": 1.0,
+			"startDelay": 20
+		},
+		{
+			"comment": "F6 快速转身 180 度（反向）",
+			"type": "KMT_DRAG",
+			"key": "Key_F6",
+			"startPos": {
+				"x": 0.5,
+				"y": 0.4
+			},
+			"endPos": {
+				"x": 0.14,
+				"y": 0.4
+			},
+			"dragSpeed": 1.0,
+			"startDelay": 20
+		},
+		{
+			"comment": "F7 一键打药：先选医疗箱，再点确认使用（不看画面也能连续完成两步）",
+			"type": "KMT_CLICK_MULTI",
+			"key": "Key_F7",
+			"clickNodes": [
+				{
+					"delay": 120,
+					"pos": {
+						"x": 0.92,
+						"y": 0.4
+					}
+				},
+				{
+					"delay": 400,
+					"pos": {
+						"x": 0.62,
+						"y": 0.62
+					}
+				}
+			]
+		},
+		{
+			"comment": "F8 一键屏息开镜：开镜 + 屏息",
+			"type": "KMT_CLICK_MULTI",
+			"key": "Key_F8",
+			"clickNodes": [
+				{
+					"delay": 80,
+					"pos": {
+						"x": 0.96,
+						"y": 0.52
+					}
+				},
+				{
+					"delay": 200,
+					"pos": {
+						"x": 0.8,
+						"y": 0.8
+					}
+				}
+			]
+		}
+	]
+}
