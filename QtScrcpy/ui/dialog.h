@@ -1,4 +1,4 @@
-﻿#ifndef DIALOG_H
+#ifndef DIALOG_H
 #define DIALOG_H
 
 #include <QWidget>
@@ -22,6 +22,7 @@ namespace Ui
 
 class QYUVOpenGLWidget;
 class QComboBox;
+class QPlainTextEdit;
 class QLineEdit;
 class QCheckBox;
 class QGroupBox;
@@ -96,6 +97,10 @@ private:
     quint32 getBitRate();
     const QString &getServerPath();
     void initAdvancedConfigUi(QWidget *parent);
+    void initKeyMapUi(QWidget *parent);
+    void reloadKeyMapFileList();
+    void loadKeyMapEditorFile();
+    void saveKeyMapEditorFile();
     void loadAdvancedConfig();
     void saveAdvancedConfig();
     void openUserDirectory(const QString &path);
@@ -141,6 +146,9 @@ private:
     QCheckBox *m_keepActiveCheck = nullptr;
     QComboBox *m_startAppBox = nullptr;
     QPushButton *m_refreshAppsBtn = nullptr;
+    // 键位映射编辑器
+    QComboBox *m_keymapFileBox = nullptr;
+    QPlainTextEdit *m_keymapEdit = nullptr;
     QMenu *m_menu;
     QAction *m_showWindow;
     QAction *m_quit;

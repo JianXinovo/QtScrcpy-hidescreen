@@ -840,6 +840,16 @@ void VideoForm::mousePressEvent(QMouseEvent *event)
 
     QWidget *vw = videoWidget();
     if (vw && vw->geometry().contains(event->pos())) {
+        if (m_screenHidden && event->button() == Qt::LeftButton) {
+            // 隐藏画面后中间是一整块留空区，用户自然会在这里拖窗口。
+            // 先不派发给设备，等抬起时按位移判断是"点击"还是"拖窗口"。
+            m_blankPressed = true;
+            m_blankDragging = false;
+            m_blankPressGlobal = globalPos.toPoint();
+            m_blankDragOffset = m_blankPressGlobal - frameGeometry().topLeft();
+            event->accept();
+            return;
+        }
         if (!device) {
             return;
         }
@@ -865,6 +875,31 @@ void VideoForm::mousePressEvent(QMouseEvent *event)
 void VideoForm::mouseReleaseEvent(QMouseEvent *event)
 {
     auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
+
+    if (m_blankPressed) {
+        // 隐藏画面时的留空区：拖动结束就到此为止；
+        // 若全程没超过位移阈值，补发一次按下+抬起，等效于一次触摸点击。
+        const bool wasDrag = m_blankDragging;
+        m_blankPressed = false;
+        m_blankDragging = false;
+        QWidget *vw = videoWidget();
+        if (!wasDrag && vw && device) {
+            QPointF local = vw->mapFrom(this, event->pos());
+            local.setX(qBound<qreal>(0.0, local.x(), static_cast<qreal>(vw->width())));
+            local.setY(qBound<qreal>(0.0, local.y(), static_cast<qreal>(vw->height())));
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+            const QPointF globalPos = event->globalPos();
+#else
+            const QPointF globalPos = event->globalPosition();
+#endif
+            QMouseEvent pressEvent(QEvent::MouseButtonPress, local, globalPos, Qt::LeftButton, Qt::LeftButton, event->modifiers());
+            emit device->mouseEvent(&pressEvent, m_frameSize, vw->size());
+            QMouseEvent releaseEvent(QEvent::MouseButtonRelease, local, globalPos, Qt::LeftButton, Qt::NoButton, event->modifiers());
+            emit device->mouseEvent(&releaseEvent, m_frameSize, vw->size());
+        }
+        return;
+    }
+
     if (m_dragPosition.isNull()) {
         if (!device) {
             return;
@@ -914,6 +949,18 @@ void VideoForm::mouseMoveEvent(QMouseEvent *event)
     auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
     QWidget *vw = videoWidget();
     if (vw && vw->geometry().contains(event->pos())) {
+        if (m_blankPressed) {
+            // 隐藏画面时的留空区：位移超过阈值就升级为"拖窗口"
+            if (!m_blankDragging
+                && (globalPos.toPoint() - m_blankPressGlobal).manhattanLength() > 4) {
+                m_blankDragging = true;
+            }
+            if (m_blankDragging) {
+                move(globalPos.toPoint() - m_blankDragOffset);
+                event->accept();
+                return;
+            }
+        }
         if (!device) {
             return;
         }

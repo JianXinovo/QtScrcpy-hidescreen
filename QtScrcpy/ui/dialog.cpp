@@ -20,6 +20,12 @@
 #include <QSizePolicy>
 #include <QScreen>
 #include <QScrollArea>
+#include <QJsonDocument>
+#include <QJsonParseError>
+#include <QLabel>
+#include <QPlainTextEdit>
+#include <QSignalBlocker>
+#include <QFont>
 #include <QSet>
 #include <QStandardPaths>
 #include <QStyledItemDelegate>
@@ -328,9 +334,12 @@ void Dialog::initUI()
     advancedDisplayLayout->addWidget(m_advancedDisplayGroup);
     advancedDisplayLayout->addStretch();
     initAdvancedConfigUi(advancedConfigPage);
+    auto *keyMapPage = new QWidget(configTabs);
+    initKeyMapUi(keyMapPage);
     configTabs->addTab(startConfigPage, tr("Start Config"));
     configTabs->addTab(advancedDisplayPage, tr("Advanced Display"));
     configTabs->addTab(advancedConfigPage, tr("Advanced Config"));
+    configTabs->addTab(keyMapPage, tr("Key map"));
     configTabs->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
     ui->verticalLayout_6->addWidget(configTabs);
 
@@ -358,6 +367,143 @@ void Dialog::initUI()
     ui->verticalLayout_5->setStretch(3, 0);
     ui->verticalLayout_4->setStretch(2, 1);
     ui->verticalLayout_6->setStretch(0, 1);
+}
+
+void Dialog::initKeyMapUi(QWidget *parent)
+{
+    auto *pageLayout = new QVBoxLayout(parent);
+    pageLayout->setContentsMargins(0, 0, 0, 0);
+
+    auto *row = new QHBoxLayout();
+    auto *fileLabel = new QLabel(tr("Key map file"), parent);
+    m_keymapFileBox = new QComboBox(parent);
+    m_keymapFileBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    auto *reloadButton = new QPushButton(tr("Reload"), parent);
+    auto *saveButton = new QPushButton(tr("Save"), parent);
+    auto *openDirButton = new QPushButton(tr("Open Keymap Directory"), parent);
+    row->addWidget(fileLabel);
+    row->addWidget(m_keymapFileBox, 1);
+    row->addWidget(reloadButton);
+    row->addWidget(saveButton);
+    row->addWidget(openDirButton);
+    pageLayout->addLayout(row);
+
+    m_keymapEdit = new QPlainTextEdit(parent);
+    m_keymapEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
+    QFont monoFont("Consolas");
+    monoFont.setStyleHint(QFont::Monospace);
+    m_keymapEdit->setFont(monoFont);
+    pageLayout->addWidget(m_keymapEdit, 1);
+
+    auto *hint = new QLabel(
+        tr("switchKey toggles the custom mapping (e.g. Key_QuoteLeft). pos is relative 0..1: left-click the video "
+           "window and read \"pos\" from the log to measure it. Save writes into the user keymap directory, then click "
+           "refresh script and apply script."),
+        parent);
+    hint->setWordWrap(true);
+    pageLayout->addWidget(hint);
+
+    connect(m_keymapFileBox, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int) {
+        loadKeyMapEditorFile();
+    });
+    connect(reloadButton, &QPushButton::clicked, this, [this]() {
+        reloadKeyMapFileList();
+        loadKeyMapEditorFile();
+    });
+    connect(saveButton, &QPushButton::clicked, this, &Dialog::saveKeyMapEditorFile);
+    connect(openDirButton, &QPushButton::clicked, this, [this]() { openUserDirectory(getKeyMapPath()); });
+
+    reloadKeyMapFileList();
+    loadKeyMapEditorFile();
+}
+
+void Dialog::reloadKeyMapFileList()
+{
+    if (!m_keymapFileBox) {
+        return;
+    }
+    const QString current = m_keymapFileBox->currentText();
+    {
+        // 清空下拉会触发 currentIndexChanged，先屏蔽掉，避免反复重读文件
+        const QSignalBlocker blocker(m_keymapFileBox);
+        Q_UNUSED(blocker)
+        m_keymapFileBox->clear();
+        initializeKeyMapDirectory();
+        const QList<QDir> dirs { QDir(getKeyMapPath()), QDir(getDefaultKeyMapPath()) };
+        QSet<QString> names;
+        for (const QDir &dir : dirs) {
+            const QFileInfoList list = dir.entryInfoList(QStringList() << "*.json", QDir::Files | QDir::NoSymLinks);
+            for (const QFileInfo &info : list) {
+                if (names.contains(info.fileName())) {
+                    continue;
+                }
+                names.insert(info.fileName());
+                m_keymapFileBox->addItem(info.fileName());
+            }
+        }
+    }
+    const int index = m_keymapFileBox->findText(current);
+    if (index >= 0) {
+        m_keymapFileBox->setCurrentIndex(index);
+    }
+}
+
+void Dialog::loadKeyMapEditorFile()
+{
+    if (!m_keymapEdit || !m_keymapFileBox) {
+        return;
+    }
+    const QString name = m_keymapFileBox->currentText();
+    if (name.isEmpty()) {
+        m_keymapEdit->clear();
+        return;
+    }
+    // 用户目录优先（可写、优先级也高），没有才读默认目录
+    const QString userFile = getKeyMapPath() + "/" + name;
+    const QString defaultFile = getDefaultKeyMapPath() + "/" + name;
+    const QString path = QFileInfo::exists(userFile) ? userFile : defaultFile;
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        m_keymapEdit->setPlainText(tr("Failed to open %1").arg(path));
+        return;
+    }
+    const QByteArray data = file.readAll();
+    file.close();
+    m_keymapEdit->setPlainText(QString::fromUtf8(data));
+}
+
+void Dialog::saveKeyMapEditorFile()
+{
+    if (!m_keymapEdit || !m_keymapFileBox) {
+        return;
+    }
+    const QString name = m_keymapFileBox->currentText();
+    if (name.isEmpty()) {
+        return;
+    }
+    QJsonParseError parseError {};
+    const QJsonDocument doc = QJsonDocument::fromJson(m_keymapEdit->toPlainText().toUtf8(), &parseError);
+    if (parseError.error != QJsonParseError::NoError) {
+        QMessageBox::warning(this, "QtScrcpy",
+                             tr("JSON error at offset %1: %2").arg(parseError.offset).arg(parseError.errorString()));
+        return;
+    }
+    if (!doc.isObject()) {
+        QMessageBox::warning(this, "QtScrcpy", tr("The key map must be a JSON object."));
+        return;
+    }
+    // 始终写到用户目录：读取优先级就是用户目录 > 默认目录
+    const QString target = getKeyMapPath() + "/" + name;
+    QFile file(target);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        QMessageBox::warning(this, "QtScrcpy", tr("Failed to write %1").arg(target));
+        return;
+    }
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+    outLog(QString("key map saved: %1").arg(target));
+    // 让主界面的脚本下拉立刻看到改动
+    on_refreshGameScriptBtn_clicked();
 }
 
 void Dialog::initAdvancedDisplayUi()

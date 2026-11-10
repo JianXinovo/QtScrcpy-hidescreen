@@ -114,6 +114,13 @@ private:
     bool m_preventAutoResize = false;
     // 画面隐藏（留空）状态
     bool m_screenHidden = false;
+    // 隐藏画面时，留空区的左键按下先不派发给设备：
+    // 抬起前位移没超过阈值算"点击"（补发一次触摸按下+抬起），
+    // 超过阈值算"拖窗口"，这样既保住点击操作又能移动窗口。
+    bool m_blankPressed = false;
+    bool m_blankDragging = false;
+    QPoint m_blankPressGlobal;
+    QPoint m_blankDragOffset;
     QTimer m_flexResizeTimer;
     QSize m_pendingDisplaySize;
 
