@@ -1553,6 +1553,18 @@ void Dialog::on_applyScriptBtn_clicked()
     }
 
     device->updateScript(getGameScript(ui->gameBox->currentText()));
+
+    // 把这份脚本交给画面窗口，并直接切进自定义映射：
+    // 否则用户 apply 完还得自己按一次 switchKey 才有反应
+    void *userData = device->getUserData();
+    if (userData) {
+        auto *videoForm = static_cast<VideoForm *>(userData);
+        const QString keymapName = ui->gameBox->currentText();
+        const QString userKeymap = getKeyMapPath() + "/" + keymapName;
+        const QString defaultKeymap = getDefaultKeyMapPath() + "/" + keymapName;
+        videoForm->setKeyMapFile(QFileInfo::exists(userKeymap) ? userKeymap : defaultKeymap);
+        videoForm->activateCustomKeymap();
+    }
 }
 
 void Dialog::on_recordScreenCheck_clicked(bool checked)

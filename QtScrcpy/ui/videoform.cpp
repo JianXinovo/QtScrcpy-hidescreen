@@ -8,6 +8,8 @@
 #include <QMimeData>
 #include <QMouseEvent>
 #include <QMoveEvent>
+#include <QKeyEvent>
+#include <QKeySequence>
 #include <QPainter>
 #include <QScreen>
 #include <QShortcut>
@@ -311,8 +313,9 @@ void VideoForm::updateCursorClip()
     if (!m_cursorLocked) {
         return;
     }
-    QWidget *vw = videoWidget();
-    const QRect rc = vw ? QRect(vw->mapToGlobal(QPoint(0, 0)), vw->size()) : frameGeometry();
+    // 用整个窗口矩形（含手机外框）而不是只框住画面，
+    // 否则指针能跑到外框/桌面上，看起来就像"没锁住"。
+    const QRect rc = frameGeometry();
     if (rc.isEmpty()) {
         return;
     }
@@ -344,6 +347,23 @@ void VideoForm::setCursorLocked(bool locked)
 #endif
         QGuiApplication::restoreOverrideCursor();
     }
+
+    // 给一个看得见的反馈，否则用户没法判断到底锁上没有
+    if (!m_lockHint) {
+        m_lockHint = new QLabel(this);
+        m_lockHint->setStyleSheet("QLabel { color: #ffc419; background: rgba(0,0,0,160); padding: 6px 14px; border-radius: 6px; }");
+        m_lockHint->setAlignment(Qt::AlignCenter);
+    }
+    m_lockHint->setText(locked ? tr("mouse locked - press ` to release") : tr("mouse released"));
+    m_lockHint->adjustSize();
+    m_lockHint->move((width() - m_lockHint->width()) / 2, height() / 2 - 60);
+    m_lockHint->show();
+    m_lockHint->raise();
+    QTimer::singleShot(1500, m_lockHint, [this]() {
+        if (m_lockHint) {
+            m_lockHint->hide();
+        }
+    });
 }
 
 bool VideoForm::isCursorLocked() const
@@ -357,6 +377,34 @@ void VideoForm::setKeyMapFile(const QString &path)
         return;
     }
     m_keymapEditor->loadFile(path);
+}
+
+void VideoForm::activateCustomKeymap()
+{
+    auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
+    if (!device || device->isCurrentCustomKeymap()) {
+        return;
+    }
+    int switchKey = Qt::Key_F9;
+    if (m_keymapEditor) {
+        const QString name = m_keymapEditor->keyMap().value("switchKey").toString();
+        const QKeySequence seq(name);
+        if (!seq.isEmpty()) {
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+            switchKey = seq[0];
+#else
+            switchKey = seq[0].key();
+#endif
+        }
+    }
+    QWidget *vw = videoWidget();
+    const QSize showSize = vw ? vw->size() : size();
+    // 核心层的自定义映射只能靠 switchKey 切换，这里代按一次，
+    // 让 apply script 之后键鼠映射直接生效
+    QKeyEvent press(QEvent::KeyPress, switchKey, Qt::NoModifier);
+    emit device->keyEvent(&press, m_frameSize, showSize);
+    QKeyEvent release(QEvent::KeyRelease, switchKey, Qt::NoModifier);
+    emit device->keyEvent(&release, m_frameSize, showSize);
 }
 
 void VideoForm::toggleKeyMapEditor()
@@ -1148,7 +1196,13 @@ void VideoForm::wheelEvent(QWheelEvent *event)
 }
 
 void VideoForm::keyPressEvent(QKeyEvent *event)
-{    auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
+{
+    auto device = qsc::IDeviceManage::getInstance().getDevice(m_serial);
+    // 兜底：万一 QShortcut 没被触发（焦点/输入法），这里再判一次 `
+    if (event->key() == Qt::Key_QuoteLeft && !event->isAutoRepeat()) {
+        setCursorLocked(!m_cursorLocked);
+        return;
+    }
     if (!device) {
         return;
     }

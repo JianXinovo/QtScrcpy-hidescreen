@@ -50,6 +50,8 @@ public:
     // 键位可视化编辑（Ctrl+E 切换，Ctrl+S 保存并同步到设备）
     void setKeyMapFile(const QString &path);
     void toggleKeyMapEditor();
+    // 用当前 keymap 的 switchKey 自动切到自定义映射（apply script 后调用）
+    void activateCustomKeymap();
 
 private:
     void onFrame(int width, int height, uint8_t* dataY, uint8_t* dataU, uint8_t* dataV,
@@ -138,6 +140,8 @@ private:
     bool m_cursorLocked = false;
     // 键位可视化编辑器（覆盖在画面上，默认隐藏）
     QPointer<KeyMapEditor> m_keymapEditor;
+    // 鼠标锁定状态提示（短暂显示，用来确认到底锁没锁上）
+    QPointer<QLabel> m_lockHint;
     QTimer m_flexResizeTimer;
     QSize m_pendingDisplaySize;
 
